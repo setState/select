@@ -317,7 +317,7 @@ const Select = React.createClass({
         if (maybe !== null) {
           label = maybe;
         }
-      } else if (getValuePropValue(child) === value) {
+      } else if (getValuePropValue(child) == value) {
         label = this.getLabelFromOption(child);
       }
     });
