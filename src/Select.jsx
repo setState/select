@@ -343,6 +343,9 @@ const Select = React.createClass({
     getVLForOnChange(vls_) {
         let vls = vls_;
         if (vls !== undefined) {
+            if (!this.props.labelInValue) {
+                vls = vls.map(v => v.key);
+            }
             return isMultipleOrTags(this.props) ? vls : vls[0];
         }
         return vls;
@@ -509,7 +512,7 @@ const Select = React.createClass({
                 value,
             });
         }
-        props.onChange(this.getVLForOnChange(value));
+        props.onChange(this.getVLForOnChange(value), isMultipleOrTags(this.props) ? value : value[0]);
     },
 
     renderTopControlNode() {
