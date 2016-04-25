@@ -4,6 +4,7 @@ import { KeyCode } from 'rc-util';
 import classnames from 'classnames';
 import OptGroup from './OptGroup';
 import Animate from 'rc-animate';
+import classes from 'component-classes';
 import {
   getPropValue, getValuePropValue, isCombobox,
   isMultipleOrTags, isMultipleOrTagsOrCombobox,
@@ -51,7 +52,7 @@ const Select = React.createClass({
     value: PropTypes.any,
     defaultValue: PropTypes.any,
     dropdownStyle: PropTypes.object,
-    maxTagTextLength: PropTypes.number, 
+    maxTagTextLength: PropTypes.number,
       extraDataField: PropTypes.string,
   },
 
