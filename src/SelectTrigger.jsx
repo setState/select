@@ -25,6 +25,7 @@ const BUILT_IN_PLACEMENTS = {
 
 const SelectTrigger = React.createClass({
   propTypes: {
+    onPopupFocus: PropTypes.func,
     dropdownMatchSelectWidth: PropTypes.bool,
     dropdownAlign: PropTypes.object,
     visible: PropTypes.bool,
@@ -38,10 +39,12 @@ const SelectTrigger = React.createClass({
   },
 
   componentDidUpdate() {
-    if (this.props.dropdownMatchSelectWidth && this.props.visible) {
+    const { visible, dropdownMatchSelectWidth } = this.props;
+    if (visible) {
       const dropdownDOMNode = this.getPopupDOMNode();
       if (dropdownDOMNode) {
-        dropdownDOMNode.style.width = `${ReactDOM.findDOMNode(this).offsetWidth}px`;
+        const widthProp = dropdownMatchSelectWidth ? 'width' : 'minWidth';
+        dropdownDOMNode.style[widthProp] = `${ReactDOM.findDOMNode(this).offsetWidth}px`;
       }
     }
   },
@@ -85,25 +88,22 @@ const SelectTrigger = React.createClass({
     this.popupMenu = menu;
   },
   render() {
-    const props = this.props;
+    const { onPopupFocus, ...props } = this.props;
     const { multiple, visible, inputValue, dropdownAlign } = props;
     const dropdownPrefixCls = this.getDropdownPrefixCls();
     const popupClassName = {
       [props.dropdownClassName]: !!props.dropdownClassName,
       [`${dropdownPrefixCls}--${multiple ? 'multiple' : 'single'}`]: 1,
     };
-    const search = multiple || props.combobox || !props.showSearch ? null : (
-      <span className={`${dropdownPrefixCls}-search`}>{props.inputElement}</span>
-    );
     const popupElement = this.getDropdownElement({
       menuItems: props.options,
-      search,
+      onPopupFocus,
       multiple,
       inputValue,
       visible,
     });
     return (<Trigger {...props}
-      action={props.disabled ? [] : ['click']}
+      showAction={props.disabled ? [] : ['click']}
       hideAction={props.disabled ? [] : ['blur']}
       ref="trigger"
       popupPlacement="bottomLeft"
@@ -114,6 +114,7 @@ const SelectTrigger = React.createClass({
       popup={popupElement}
       popupAlign={dropdownAlign}
       popupVisible={visible}
+      getPopupContainer={props.getPopupContainer}
       popupClassName={classnames(popupClassName)}
       popupStyle={props.dropdownStyle}
     >{props.children}</Trigger>);
