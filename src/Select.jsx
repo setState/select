@@ -371,9 +371,6 @@ const Select = React.createClass({
 
   getLabelByValue(children, value) {
     const label = this.getLabelBySingleValue(children, value);
-    if (label === null) {
-      return value;
-    }
     return label;
   },
 
