@@ -280,7 +280,9 @@ const Select = React.createClass({
   },
 
   onPlaceholderClick() {
-    this.getInputDOMNode().focus();
+    if (this.getInputDOMNode()) {
+      this.getInputDOMNode().focus();
+    }
   },
 
   onOuterFocus() {
