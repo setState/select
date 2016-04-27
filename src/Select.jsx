@@ -109,6 +109,18 @@ const Select = React.createClass({
     };
   },
 
+  getValue: function getValue(){
+
+    return this.state.value;
+
+   },
+   setValue: function setValue(value) {
+       this.setState({
+       value: value
+       });
+
+   },
+
   componentWillReceiveProps(nextProps) {
     if ('value' in nextProps) {
       let value = toArray(nextProps.value);
