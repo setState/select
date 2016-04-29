@@ -44,6 +44,7 @@ const Select = React.createClass({
     defaultLabel: PropTypes.oneOfType([PropTypes.array, PropTypes.any]),
     dropdownStyle: PropTypes.object,
     maxTagTextLength: PropTypes.number,
+    extraDataField: PropTypes.string,
   },
 
   getDefaultProps() {
@@ -66,6 +67,7 @@ const Select = React.createClass({
       optionFilterProp: 'value',
       optionLabelProp: 'value',
       notFoundContent: 'Not Found',
+      extraDataField: 'extra',
     };
   },
 
@@ -203,6 +205,7 @@ const Select = React.createClass({
     const props = this.props;
     const selectedValue = getValuePropValue(item);
     const selectedLabel = this.getLabelFromOption(item);
+    const selectedExtra = this.getExtraDataFromOption(item);
     props.onSelect(selectedValue, item);
     if (isMultipleOrTags(props)) {
       if (value.indexOf(selectedValue) !== -1) {
@@ -217,8 +220,9 @@ const Select = React.createClass({
       }
       value = [selectedValue];
       label = [selectedLabel];
+      extra = [selectedExtra];
     }
-    this.fireChange(value, label);
+    this.fireChange(value, label,extra);
     this.setOpenState(false);
     this.setState({
       inputValue: '',
@@ -282,6 +286,10 @@ const Select = React.createClass({
     return getPropValue(child, this.props.optionLabelProp);
   },
 
+  getExtraDataFromOption(child) {
+    return getPropValue(child, this.props.extraDataField);
+  },
+
   getLabelFromProps(props, value, init) {
     let label = [];
     if ('label' in props) {
@@ -304,9 +312,9 @@ const Select = React.createClass({
   getLabelByValue(children, values) {
     return values.map((value)=> {
       const label = this.getLabelBySingleValue(children, value);
-      if (label === null) {
-        return value;
-      }
+      // if (label === null) {
+      //   return value;
+      // }
       return label;
     });
   },
@@ -398,14 +406,14 @@ const Select = React.createClass({
     }
   },
 
-  fireChange(value, label) {
+  fireChange(value, label,extra={}) {
     const props = this.props;
     if (!('value' in props)) {
       this.setState({
         value, label,
       });
     }
-    props.onChange(this.getVLForOnChange(value), this.getVLForOnChange(label));
+    props.onChange(this.getVLForOnChange(value), this.getVLForOnChange(label),extra);
   },
 
   renderTopControlNode() {
