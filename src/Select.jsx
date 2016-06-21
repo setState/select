@@ -528,12 +528,12 @@ const Select = React.createClass({
             });
         } else {
             value = [];
-            let thisLabel = "";
+            let thisLabel = "",
+                isCombo=isCombobox(props);
 
             value_.forEach(v => {
                 thisLabel = this.getLabelFromProps(props, v);
-
-                if (thisLabel)
+                if (thisLabel || isCombo)
                     value[value.length] = {
                         key: v,
                         label: thisLabel
