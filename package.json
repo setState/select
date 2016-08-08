@@ -1,6 +1,6 @@
 {
   "name": "rc-select",
-  "version": "6.3.1",
+  "version": "6.4.7",
   "description": "React Select",
   "keywords": [
     "react",
@@ -23,7 +23,21 @@
   },
   "licenses": "MIT",
   "scripts": {
+<<<<<<< HEAD
     "build": "babel ./src -d ./lib && gulp less"
+=======
+    "build": "rc-tools run build",
+    "gh-pages": "rc-tools run gh-pages",
+    "start": "rc-tools run server",
+    "pub": "rc-tools run pub",
+    "lint": "rc-tools run lint",
+    "karma": "rc-tools run karma",
+    "saucelabs": "rc-tools run saucelabs",
+    "test": "rc-tools run test",
+    "prepublish": "rc-tools run guard",
+    "chrome-test": "rc-tools run chrome-test",
+    "coverage": "rc-tools run coverage"
+>>>>>>> react-component/master
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",
@@ -49,6 +63,15 @@
     "rc-animate": "2.x",
     "rc-menu": "4.x",
     "rc-trigger": "1.x",
+<<<<<<< HEAD
     "rc-util": "3.x"
   }
+=======
+    "rc-util": "3.x",
+    "warning": "2.x"
+  },
+  "pre-commit": [
+    "lint"
+  ]
+>>>>>>> react-component/master
 }

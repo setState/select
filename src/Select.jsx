@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import { KeyCode } from 'rc-util';
+import KeyCode from 'rc-util/lib/KeyCode';
 import classnames from 'classnames';
 import OptGroup from './OptGroup';
 import Animate from 'rc-animate';
@@ -100,6 +100,7 @@ const Select = React.createClass({
       inputValue = value.length ? String(value[0].key) : '';
     }
     this.saveInputRef = saveRef.bind(this, 'inputInstance');
+    this.saveInputMirrorRef = saveRef.bind(this, 'inputMirrorInstance');
     let open = props.open;
     if (open === undefined) {
       open = props.defaultOpen;
@@ -142,9 +143,10 @@ const Select = React.createClass({
     const { state, props } = this;
     if (state.open && isMultipleOrTags(props)) {
       const inputNode = this.getInputDOMNode();
+      const mirrorNode = this.getInputMirrorDOMNode();
       if (inputNode.value) {
         inputNode.style.width = '';
-        inputNode.style.width = `${inputNode.scrollWidth}px`;
+        inputNode.style.width = `${mirrorNode.clientWidth}px`;
       } else {
         inputNode.style.width = '';
       }
@@ -163,8 +165,8 @@ const Select = React.createClass({
   onInputChange(event) {
     const val = event.target.value;
     const { props } = this;
+    this.setInputValue(val);
     this.setState({
-      inputValue: val,
       open: true,
     });
     if (isCombobox(props)) {
@@ -172,7 +174,6 @@ const Select = React.createClass({
         key: val,
       }]);
     }
-    props.onSearch(val);
   },
 
   onDropdownVisibleChange(open) {
@@ -202,6 +203,7 @@ const Select = React.createClass({
     const state = this.state;
     const keyCode = event.keyCode;
     if (isMultipleOrTags(props) && !event.target.value && keyCode === KeyCode.BACKSPACE) {
+      event.preventDefault();
       const value = state.value.concat();
       if (value.length) {
         const popValue = value.pop();
@@ -235,6 +237,7 @@ const Select = React.createClass({
     }
   },
 
+<<<<<<< HEAD
     onMenuSelect({item}) {
         let value = this.state.value;
         const props = this.props;
@@ -279,19 +282,62 @@ const Select = React.createClass({
             });
         }
     },
+=======
+  onMenuSelect({ item }) {
+    let value = this.state.value;
+    const props = this.props;
+    const selectedValue = getValuePropValue(item);
+    const selectedLabel = this.getLabelFromOption(item);
+    let event = selectedValue;
+    if (props.labelInValue) {
+      event = {
+        key: event,
+        label: selectedLabel,
+      };
+    }
+    props.onSelect(event, item);
+    if (isMultipleOrTags(props)) {
+      if (findIndexInValueByKey(value, selectedValue) !== -1) {
+        return;
+      }
+      value = value.concat([{
+        key: selectedValue,
+        label: selectedLabel,
+      }]);
+    } else {
+      if (value.length && value[0].key === selectedValue) {
+        this.setOpenState(false, true);
+        return;
+      }
+      value = [{
+        key: selectedValue,
+        label: selectedLabel,
+      }];
+      this.setOpenState(false, true);
+    }
+    this.fireChange(value);
+    let inputValue;
+    if (isCombobox(props)) {
+      inputValue = getPropValue(item, props.optionLabelProp);
+    } else {
+      inputValue = '';
+    }
+    this.setInputValue(inputValue, false);
+  },
+>>>>>>> react-component/master
 
   onMenuDeselect({ item, domEvent }) {
     if (domEvent.type === 'click') {
       this.removeSelected(getValuePropValue(item));
     }
-    this.setState({
-      inputValue: '',
-    });
+    this.setInputValue('', false);
   },
 
   onArrowClick(e) {
     e.stopPropagation();
-    this.setOpenState(!this.state.open, true);
+    if (!this.props.disabled) {
+      this.setOpenState(!this.state.open, true);
+    }
   },
 
   onPlaceholderClick() {
@@ -341,18 +387,21 @@ const Select = React.createClass({
     if (props.disabled) {
       return;
     }
+    const { inputValue, value } = state;
     event.stopPropagation();
-    if (state.inputValue || state.value.length) {
-      if (this.state.value.length) {
+    if (inputValue || value.length) {
+      if (value.length) {
         this.fireChange([]);
       }
       this.setOpenState(false, true);
-      if (this.state.inputValue) {
-        this.setState({
-          inputValue: '',
-        });
+      if (inputValue) {
+        this.setInputValue('');
       }
     }
+  },
+
+  onChoiceAnimationLeave() {
+    this.refs.trigger.refs.trigger.forcePopupAlign();
   },
 
   getLabelBySingleValue(children, value) {
@@ -450,11 +499,21 @@ const Select = React.createClass({
         disabled={props.disabled}
         className={`${props.prefixCls}-search__field`}
       />
+      <span
+        ref={this.saveInputMirrorRef}
+        className={`${props.prefixCls}-search__field__mirror`}
+      >
+        {this.state.inputValue}
+      </span>
     </div>);
   },
 
   getInputDOMNode() {
     return this.inputInstance;
+  },
+
+  getInputMirrorDOMNode() {
+    return this.inputMirrorInstance;
   },
 
   getPopupDOMNode() {
@@ -476,7 +535,7 @@ const Select = React.createClass({
     };
     // clear search input value when open is false in singleMode.
     if (!open && isSingleMode(props) && props.showSearch) {
-      nextState.inputValue = '';
+      this.setInputValue('');
     }
     if (!open) {
       this.maybeFocus(open, needFocus);
@@ -486,6 +545,14 @@ const Select = React.createClass({
         this.maybeFocus(open, needFocus);
       }
     });
+  },
+  setInputValue(inputValue, fireSearch = true) {
+    this.setState({
+      inputValue,
+    });
+    if (fireSearch) {
+      this.props.onSearch(inputValue);
+    }
   },
   clearBlurTime() {
     if (this.blurTimer) {
@@ -576,6 +643,7 @@ const Select = React.createClass({
       this.setOpenState(true);
     }
   },
+<<<<<<< HEAD
 
     fireChange(value) {
         const props = this.props;
@@ -586,6 +654,17 @@ const Select = React.createClass({
         }
         props.onChange(this.getVLForOnChange(value), isMultipleOrTags(this.props) ? value : value[0]);
     },
+=======
+  fireChange(value) {
+    const props = this.props;
+    if (!('value' in props)) {
+      this.setState({
+        value,
+      });
+    }
+    props.onChange(this.getVLForOnChange(value));
+  },
+>>>>>>> react-component/master
 
   renderTopControlNode() {
     const { value, open, inputValue } = this.state;
@@ -615,6 +694,7 @@ const Select = React.createClass({
           <div
             key="value"
             className={`${prefixCls}-selection-selected-value`}
+            title={value[0].label}
             style={{
               display: showSelectedValue ? 'block' : 'none',
               opacity,
@@ -647,20 +727,29 @@ const Select = React.createClass({
             content.length > maxTagTextLength) {
             content = `${content.slice(0, maxTagTextLength)}...`;
           }
+          const disabled = toArray(props.children).some(child => {
+            const childValue = getValuePropValue(child);
+            return childValue === singleValue.key && child.props && child.props.disabled;
+          });
+          const choiceClassName = disabled
+            ? `${prefixCls}-selection__choice ${prefixCls}-selection__choice__disabled`
+            : `${prefixCls}-selection__choice`;
           return (
             <li
               style={UNSELECTABLE_STYLE}
               {...UNSELECTABLE_ATTRIBUTE}
               onMouseDown={preventDefaultEvent}
-              className={`${prefixCls}-selection__choice`}
+              className={choiceClassName}
               key={singleValue.key}
               title={title}
             >
               <div className={`${prefixCls}-selection__choice__content`}>{content}</div>
-            <span
-              className={`${prefixCls}-selection__choice__remove`}
-              onClick={this.removeSelected.bind(this, singleValue.key)}
-            />
+              {
+                disabled ? null : <span
+                  className={`${prefixCls}-selection__choice__remove`}
+                  onClick={this.removeSelected.bind(this, singleValue.key)}
+                />
+              }
             </li>
           );
         });
@@ -674,6 +763,7 @@ const Select = React.createClass({
 
       if (isMultipleOrTags(props) && choiceTransitionName) {
         innerNode = (<Animate
+          onLeave={this.onChoiceAnimationLeave}
           component="ul"
           transitionName={choiceTransitionName}
         >
@@ -722,7 +812,7 @@ const Select = React.createClass({
       ...UNSELECTABLE_STYLE,
       display: 'none',
     };
-    if (this.state.inputValue || this.state.value.length) {
+    if (state.inputValue || state.value.length) {
       clearStyle.display = 'block';
     }
     const clear = (<span

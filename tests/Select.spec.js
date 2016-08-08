@@ -79,8 +79,8 @@ describe('Select', () => {
     instance.setState({
       open: true,
     }, () => {
-      expect(instance.getPopupMenuComponent().instanceArray[0].props.selected).to.be(false);
-      expect(instance.getPopupMenuComponent().instanceArray[1].props.selected).to.be(true);
+      expect(instance.getPopupMenuComponent().instanceArray[0].isSelected()).to.be(false);
+      expect(instance.getPopupMenuComponent().instanceArray[1].isSelected()).to.be(true);
       done();
     });
   });
@@ -95,14 +95,25 @@ describe('Select', () => {
     instance.setState({
       open: true,
     }, () => {
-      expect(instance.getPopupMenuComponent().instanceArray[0].props.selected).to.be(true);
-      expect(instance.getPopupMenuComponent().instanceArray[1].props.selected).to.be(true);
-      expect(instance.getPopupMenuComponent().instanceArray[2].props.selected).to.be(false);
+      expect(instance.getPopupMenuComponent().instanceArray[0].isSelected()).to.be(true);
+      expect(instance.getPopupMenuComponent().instanceArray[1].isSelected()).to.be(true);
+      expect(instance.getPopupMenuComponent().instanceArray[2].isSelected()).to.be(false);
       done();
     });
   });
 
-  it('should have clear button', () => {
+  it('should show clear button', () => {
+    instance = ReactDOM.render(
+      <Select value="1" allowClear>
+        <Option value="1">1</Option>
+        <Option value="2">2</Option>
+      </Select>,
+      div);
+    expect(TestUtils.scryRenderedDOMComponentsWithClass(instance,
+      'rc-select-selection__clear')[0].style.display).to.be('block');
+  });
+
+  it('should hide clear button', () => {
     instance = ReactDOM.render(
       <Select allowClear>
         <Option value="1">1</Option>
@@ -110,7 +121,7 @@ describe('Select', () => {
       </Select>,
       div);
     expect(TestUtils.scryRenderedDOMComponentsWithClass(instance,
-      'rc-select-selection__clear').length).to.be(1);
+      'rc-select-selection__clear')[0].style.display).to.be('none');
   });
 
   it('should not response click event when select is disabled', (done) => {
