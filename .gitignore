@@ -23,3 +23,5 @@ node_modules
 dist
 build
 coverage
+.vscode
+yarn.lock

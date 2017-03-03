@@ -1,8 +1,9 @@
 import React, { cloneElement, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import { getSelectKeys, preventDefaultEvent } from './util';
-import Menu, { ItemGroup as MenuItemGroup } from 'rc-menu';
+import toArray from 'rc-util/lib/Children/toArray';
+import Menu from 'rc-menu';
 import scrollIntoView from 'dom-scroll-into-view';
+import { getSelectKeys, preventDefaultEvent } from './util';
 
 const DropdownMenu = React.createClass({
   propTypes: {
@@ -96,8 +97,8 @@ const DropdownMenu = React.createClass({
         };
 
         clonedMenuItems = menuItems.map(item => {
-          if (item.type === MenuItemGroup) {
-            const children = item.props.children.map(clone);
+          if (item.type.isMenuItemGroup) {
+            const children = toArray(item.props.children).map(clone);
             return cloneElement(item, {}, children);
           }
           return clone(item);
@@ -127,13 +128,16 @@ const DropdownMenu = React.createClass({
   },
 
   render() {
-    return (<div
-      style={{ overflow: 'auto' }}
-      onFocus={this.props.onPopupFocus}
-      onMouseDown={preventDefaultEvent}
-    >
-      {this.renderMenu()}
-    </div>);
+    const renderMenu = this.renderMenu();
+    return renderMenu ? (
+      <div
+        style={{ overflow: 'auto' }}
+        onFocus={this.props.onPopupFocus}
+        onMouseDown={preventDefaultEvent}
+      >
+        {renderMenu}
+      </div>
+    ) : null;
   },
 });
 
