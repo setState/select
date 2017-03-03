@@ -15,6 +15,7 @@ import {
 } from './util';
 import SelectTrigger from './SelectTrigger';
 import FilterMixin from './FilterMixin';
+import warning from 'warning';
 
 function noop() {
 }
@@ -77,6 +78,7 @@ const Select = React.createClass({
     maxTagTextLength: PropTypes.number,
     tokenSeparators: PropTypes.arrayOf(PropTypes.string),
     getInputElement: PropTypes.func,
+    extraDataField: PropTypes.string //ux
   },
 
   mixins: [FilterMixin],
@@ -105,7 +107,19 @@ const Select = React.createClass({
       optionFilterProp: 'value',
       optionLabelProp: 'value',
       notFoundContent: 'Not Found',
+      extraDataField: 'extra', //ux
     };
+  },
+
+  getValue(){
+    return this.state.value;
+  },
+
+  setValue(value) {
+    warning(false, "setValue is deprecated, don't use it.");
+    this.setState({
+      value: value
+    });
   },
 
   getInitialState() {
@@ -271,7 +285,9 @@ const Select = React.createClass({
     const props = this.props;
     const selectedValue = getValuePropValue(item);
     const selectedLabel = this.getLabelFromOption(item);
-    let event = selectedValue;
+    //ux
+    const selectedExtra = this.getExtraDataFromOption(item);
+      let event = selectedValue;
     if (props.labelInValue) {
       event = {
         key: event,
@@ -305,6 +321,7 @@ const Select = React.createClass({
         key: selectedValue,
         label: selectedLabel,
         title: selectedTitle,
+        extra: selectedExtra //ux
       }];
       this.setOpenState(false, true);
     }
@@ -369,6 +386,8 @@ const Select = React.createClass({
             value = [{
               key: firstOption.key,
               label: this.getLabelFromOption(firstOption),
+              //ux
+              extra: this.getExtraDataFromOption(firstOption)
             }];
             this.fireChange(value);
           }
@@ -446,6 +465,11 @@ const Select = React.createClass({
 
   getLabelFromProps(props, value) {
     return this.getLabelByValue(props.children, value);
+  },
+
+  //ux
+  getExtraDataFromOption(child) {
+      return getPropValue(child, this.props.extraDataField);
   },
 
   getVLForOnChange(vls_) {
@@ -692,7 +716,8 @@ const Select = React.createClass({
         value,
       });
     }
-    props.onChange(this.getVLForOnChange(value));
+    //ux
+    props.onChange(this.getVLForOnChange(value), isMultipleOrTags(this.props) ? value : value[0]);
   },
 
   isChildDisabled(key) {
