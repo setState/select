@@ -111,6 +111,7 @@ const Select = React.createClass({
     };
   },
 
+  //ux start
   getValue(){
     return this.state.value;
   },
@@ -121,6 +122,7 @@ const Select = React.createClass({
       value: value
     });
   },
+  //ux end
 
   getInitialState() {
     const props = this.props;
