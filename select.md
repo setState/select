@@ -27,3 +27,17 @@
 [https://github.com/setState/select/commit/7c09c5885d4c82075629e80baa467443d5ade6c2](https://github.com/setState/select/commit/7c09c5885d4c82075629e80baa467443d5ade6c2)
 
 ### 5. 添加setValue，getValue
+
+### 6 getPlaceholderElement
+兼容以下情况
+
+添加额外判断placeholder的显隐
+
+```js
+// ux
+    if (state.value.length === 1 && !state.value[0].key) {
+      hidden = false;
+    }
+```
+
+防止value=" " 被转换为 {value:"",label:""} 

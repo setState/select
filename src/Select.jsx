@@ -515,6 +515,10 @@ const Select = React.createClass({
     if (isCombobox(props) && state.value.length === 1 && !state.value[0].key) {
       hidden = false;
     }
+    // ux
+    if (state.value.length === 1 && !state.value[0].key) {
+      hidden = false;
+    }
     const placeholder = props.placeholder;
     if (placeholder) {
       return (<div
