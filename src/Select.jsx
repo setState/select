@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import KeyCode from 'rc-util/lib/KeyCode';
 import classnames from 'classnames';
@@ -201,7 +201,7 @@ const Select = React.createClass({
   },
 
   onInputChange(event) {
-    const { tokenSeparators } = this.props;
+    const {tokenSeparators} = this.props;
     const val = event.target.value;
     if (isMultipleOrTags(this.props) &&
       tokenSeparators &&
@@ -251,7 +251,7 @@ const Select = React.createClass({
     const keyCode = event.keyCode;
     if (isMultipleOrTags(props) && !event.target.value && keyCode === KeyCode.BACKSPACE) {
       event.preventDefault();
-      const { value } = state;
+      const {value} = state;
       if (value.length) {
         this.removeSelected(value[value.length - 1].key);
       }
@@ -282,14 +282,14 @@ const Select = React.createClass({
     }
   },
 
-  onMenuSelect({ item }) {
+  onMenuSelect({item}) {
     let value = this.state.value;
     const props = this.props;
     const selectedValue = getValuePropValue(item);
     const selectedLabel = this.getLabelFromOption(item);
     //ux
     const selectedExtra = this.getExtraDataFromOption(item);
-      let event = selectedValue;
+    let event = selectedValue;
     if (props.labelInValue) {
       event = {
         key: event,
@@ -337,7 +337,7 @@ const Select = React.createClass({
     this.setInputValue(inputValue, false);
   },
 
-  onMenuDeselect({ item, domEvent }) {
+  onMenuDeselect({item, domEvent}) {
     if (domEvent.type === 'click') {
       this.removeSelected(getValuePropValue(item));
     }
@@ -377,8 +377,8 @@ const Select = React.createClass({
       this._focused = false;
       this.updateFocusClassName();
       const props = this.props;
-      let { value } = this.state;
-      const { inputValue } = this.state;
+      let {value} = this.state;
+      const {inputValue} = this.state;
       if (isSingleMode(props) && props.showSearch &&
         inputValue && props.defaultActiveFirstOption) {
         const options = this._options || [];
@@ -408,7 +408,7 @@ const Select = React.createClass({
     if (props.disabled) {
       return;
     }
-    const { inputValue, value } = state;
+    const {inputValue, value} = state;
     event.stopPropagation();
     if (inputValue || value.length) {
       if (value.length) {
@@ -471,7 +471,7 @@ const Select = React.createClass({
 
   //ux
   getExtraDataFromOption(child) {
-      return getPropValue(child, this.props.extraDataField);
+    return getPropValue(child, this.props.extraDataField);
   },
 
   getVLForOnChange(vls_) {
@@ -480,7 +480,7 @@ const Select = React.createClass({
       if (!this.props.labelInValue) {
         vls = vls.map(v => v.key);
       } else {
-        vls = vls.map(vl => ({ key: vl.key, label: vl.label }));
+        vls = vls.map(vl => ({key: vl.key, label: vl.label}));
       }
       return isMultipleOrTags(this.props) ? vls : vls[0];
     }
@@ -504,7 +504,7 @@ const Select = React.createClass({
   },
 
   getPlaceholderElement() {
-    const { props, state } = this;
+    const {props, state} = this;
     let hidden = false;
     if (state.inputValue) {
       hidden = true;
@@ -513,10 +513,6 @@ const Select = React.createClass({
       hidden = true;
     }
     if (isCombobox(props) && state.value.length === 1 && !state.value[0].key) {
-      hidden = false;
-    }
-    // ux
-    if (state.value.length === 1 && !state.value[0].key) {
       hidden = false;
     }
     const placeholder = props.placeholder;
@@ -580,7 +576,7 @@ const Select = React.createClass({
   },
 
   setOpenState(open, needFocus) {
-    const { props, state } = this;
+    const {props, state} = this;
     if (state.open === open) {
       this.maybeFocus(open, needFocus);
       return;
@@ -624,7 +620,7 @@ const Select = React.createClass({
     }
   },
   updateFocusClassName() {
-    const { refs, props } = this;
+    const {refs, props} = this;
     // avoid setState and its side effect
     if (this._focused) {
       classes(refs.root).add(`${props.prefixCls}-focused`);
@@ -636,7 +632,7 @@ const Select = React.createClass({
   maybeFocus(open, needFocus) {
     if (needFocus || open) {
       const input = this.getInputDOMNode();
-      const { activeElement } = document;
+      const {activeElement} = document;
       if (input && (open || isMultipleOrTagsOrCombobox(this.props))) {
         if (activeElement !== input) {
           input.focus();
@@ -657,12 +653,20 @@ const Select = React.createClass({
         v.label = v.label || this.getLabelFromProps(props, v.key);
       });
     } else {
-      value = value.map(v => {
-        return {
-          key: v,
-          label: this.getLabelFromProps(props, v),
-        };
+      // ux
+      let thisLabel = "";
+
+      value = [];
+
+      value_.forEach(v => {
+        thisLabel = this.getLabelFromProps(props, v);
+        if (thisLabel || isCombobox(props))
+          value[value.length] = {
+            key: v,
+            label: thisLabel
+          };
       });
+      // ux
     }
     return value;
   },
@@ -736,10 +740,10 @@ const Select = React.createClass({
   },
 
   tokenize(string) {
-    const { multiple, tokenSeparators, children } = this.props;
+    const {multiple, tokenSeparators, children} = this.props;
     let nextValue = this.state.value;
     splitBySeparators(string, tokenSeparators).forEach(label => {
-      const selectedValue = { key: label, label };
+      const selectedValue = {key: label, label};
       if (findIndexInValueByLabel(nextValue, label) === -1) {
         if (multiple) {
           const value = this.getValueByLabel(children, label);
@@ -759,7 +763,7 @@ const Select = React.createClass({
     if (this.skipAdjustOpen) {
       return;
     }
-    let { open } = this.state;
+    let {open} = this.state;
     if (typeof document !== 'undefined' &&
       this.getInputDOMNode() &&
       document.activeElement === this.getInputDOMNode()) {
@@ -778,9 +782,9 @@ const Select = React.createClass({
   },
 
   renderTopControlNode() {
-    const { value, open, inputValue } = this.state;
+    const {value, open, inputValue} = this.state;
     const props = this.props;
-    const { choiceTransitionName, prefixCls, maxTagTextLength, showSearch } = props;
+    const {choiceTransitionName, prefixCls, maxTagTextLength, showSearch} = props;
     const className = `${prefixCls}-selection__rendered`;
     // search input is inside topControlNode in single, multiple & combobox. 2016/04/13
     let innerNode = null;
@@ -855,9 +859,9 @@ const Select = React.createClass({
               <div className={`${prefixCls}-selection__choice__content`}>{content}</div>
               {
                 disabled ? null : <span
-                  className={`${prefixCls}-selection__choice__remove`}
-                  onClick={this.removeSelected.bind(this, singleValue.key)}
-                />
+                    className={`${prefixCls}-selection__choice__remove`}
+                    onClick={this.removeSelected.bind(this, singleValue.key)}
+                  />
               }
             </li>
           );
@@ -889,10 +893,10 @@ const Select = React.createClass({
     const props = this.props;
     const multiple = isMultipleOrTags(props);
     const state = this.state;
-    const { className, disabled, allowClear, prefixCls } = props;
+    const {className, disabled, allowClear, prefixCls} = props;
     const ctrlNode = this.renderTopControlNode();
     let extraSelectionProps = {};
-    const { open } = this.state;
+    const {open} = this.state;
     const options = this._options;
     if (!isMultipleOrTagsOrCombobox(props)) {
       extraSelectionProps = {

@@ -28,16 +28,7 @@
 
 ### 5. 添加setValue，getValue
 
-### 6 getPlaceholderElement
+### 6 addLabelToValue
 兼容以下情况
-
-添加额外判断placeholder的显隐
-
-```js
-// ux
-    if (state.value.length === 1 && !state.value[0].key) {
-      hidden = false;
-    }
-```
 
 防止value=" " 被转换为 {value:"",label:""} 
