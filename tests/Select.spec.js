@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { mount, render } from 'enzyme';
-import { renderToJson } from 'enzyme-to-json';
 import KeyCode from 'rc-util/lib/KeyCode';
 import Select, { Option, OptGroup } from '../src';
 
@@ -32,18 +31,12 @@ describe('Select', () => {
 
     it('renders correctly', () => {
       const wrapper = render(select);
-
-      expect(renderToJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     it('renders dropdown correctly', () => {
-      const wrapper = mount(select);
-
-      wrapper.find('.select-test').simulate('click');
-      expect(wrapper.find('.select-test').props().className).toContain('-open');
-
-      const dropdownWrapper = render(wrapper.find('Trigger').node.getComponent());
-      expect(renderToJson(dropdownWrapper)).toMatchSnapshot();
+      const wrapper = render(React.cloneElement(select, { open: true }));
+      expect(wrapper).toMatchSnapshot();
     });
   });
 
@@ -86,8 +79,7 @@ describe('Select', () => {
       </Select>
     );
     wrapper.find('.rc-select').simulate('click');
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    expect(dropdownWrapper.find('Menu').props().selectedKeys).toEqual(['2']);
+    expect(wrapper.find('Menu').props().selectedKeys).toEqual(['2']);
   });
 
   it('should can select multiple items', () => {
@@ -99,8 +91,7 @@ describe('Select', () => {
       </Select>
     );
     wrapper.find('.rc-select').simulate('click');
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    expect(dropdownWrapper.find('Menu').props().selectedKeys).toEqual(['1', '2']);
+    expect(wrapper.find('Menu').props().selectedKeys).toEqual(['1', '2']);
   });
 
   it('should hide clear button', () => {
@@ -144,9 +135,8 @@ describe('Select', () => {
     );
 
     wrapper.find('input').simulate('change', { target: { value: '1' } });
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    expect(dropdownWrapper.find('MenuItem').length).toBe(1);
-    expect(dropdownWrapper.find('MenuItem').props().value).toBe('1');
+    expect(wrapper.find('MenuItem').length).toBe(1);
+    expect(wrapper.find('MenuItem').props().value).toBe('1');
   });
 
   it('specify which prop to filter', () => {
@@ -158,10 +148,9 @@ describe('Select', () => {
     );
 
     wrapper.find('input').simulate('change', { target: { value: 'Two' } });
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
 
-    expect(dropdownWrapper.find('MenuItem').length).toBe(1);
-    expect(dropdownWrapper.find('MenuItem').props().value).toBe('2');
+    expect(wrapper.find('MenuItem').length).toBe(1);
+    expect(wrapper.find('MenuItem').props().value).toBe('2');
   });
 
   it('no search', () => {
@@ -172,7 +161,7 @@ describe('Select', () => {
       </Select>
     );
 
-    expect(renderToJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('open dropdown on down key press', () => {
@@ -220,8 +209,7 @@ describe('Select', () => {
     );
 
     wrapper.find('.rc-select').simulate('click');
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    dropdownWrapper.find('MenuItem').first().simulate('click');
+    wrapper.find('MenuItem').first().simulate('click');
     expect(handleChange).toBeCalledWith({ key: '1', label: 'One' });
   });
 
@@ -253,8 +241,7 @@ describe('Select', () => {
       </Select>
     );
     wrapper.find('.rc-select').simulate('click');
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    dropdownWrapper.find('MenuItem').first().simulate('click');
+    wrapper.find('MenuItem').first().simulate('click');
     expect(handleSearch).not.toBeCalled();
   });
 
@@ -269,7 +256,9 @@ describe('Select', () => {
           <Option value="2">2</Option>
         </Select>
       );
-      wrapper.find('div').first().simulate('focus');
+      jest.useFakeTimers();
+      wrapper.find('.rc-select').simulate('focus');
+      jest.runAllTimers();
     });
 
     it('set _focused to true', () => {
@@ -278,10 +267,56 @@ describe('Select', () => {
 
     it('fires focus event', () => {
       expect(handleFocus).toBeCalled();
+      expect(handleFocus.mock.calls.length).toBe(1);
     });
 
     it('set className', () => {
-      expect(wrapper.find('div').first().node.className).toContain('-focus');
+      expect(wrapper.find('.rc-select').node.className).toContain('-focus');
+    });
+  });
+
+  describe('click input will trigger focus', () => {
+    let handleFocus;
+    let wrapper;
+    beforeEach(() => {
+      handleFocus = jest.fn();
+      wrapper = mount(
+        <Select onFocus={handleFocus}>
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+        </Select>
+      );
+      jest.useFakeTimers();
+      wrapper.find('.rc-select input').simulate('click');
+      jest.runAllTimers();
+    });
+
+    it('set _focused to true', () => {
+      expect(wrapper.instance()._focused).toBe(true);
+    });
+
+    it('fires focus event', () => {
+      expect(handleFocus).toBeCalled();
+      expect(handleFocus.mock.calls.length).toBe(1);
+    });
+
+    it('set className', () => {
+      expect(wrapper.find('.rc-select').node.className).toContain('-focus');
+    });
+
+    it('click placeholder should trigger onFocus', () => {
+      const handleFocus2 = jest.fn();
+      const wrapper2 = mount(
+        <Select onFocus={handleFocus2} placeholder="xxxx">
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+        </Select>
+      );
+      jest.useFakeTimers();
+      wrapper2.find('.rc-select-selection__placeholder').simulate('click');
+      jest.runAllTimers();
+      expect(handleFocus2.mock.calls).toHaveLength(1);
+      expect(handleFocus2).toBeCalled();
     });
   });
 
@@ -305,7 +340,7 @@ describe('Select', () => {
       );
       jest.useFakeTimers();
       wrapper.find('input').simulate('change', { target: { value: '1' } });
-      wrapper.find('div').first().simulate('blur');
+      wrapper.find('.rc-select').simulate('blur');
       jest.runAllTimers();
     });
 
@@ -322,7 +357,7 @@ describe('Select', () => {
     });
 
     it('set className', () => {
-      expect(wrapper.find('div').first().node.className).not.toContain('-focus');
+      expect(wrapper.find('.rc-select').node.className).not.toContain('-focus');
     });
   });
 
@@ -341,7 +376,7 @@ describe('Select', () => {
     });
 
     it('clear blur timer', () => {
-      wrapper.find('div').first().simulate('blur');
+      wrapper.find('.rc-select').simulate('blur');
 
       expect(instance.blurTimer).toBeTruthy();
       instance.componentWillUnmount();
@@ -396,8 +431,7 @@ describe('Select', () => {
     wrapper.find('.rc-select').simulate('click');
     expect(wrapper.state().open).toBe(true);
 
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
-    dropdownWrapper.find('MenuItem').simulate('click');
+    wrapper.find('MenuItem').simulate('click');
     expect(wrapper.state().open).toBe(false);
   });
 
@@ -427,8 +461,9 @@ describe('Select', () => {
   });
 
   it('combox could comstomize input element', () => {
+    const handleKeyDown = jest.fn();
     const wrapper = mount(
-      <Select combobox getInputElement={() => <textarea />}>
+      <Select combobox getInputElement={() => <textarea onKeyDown={handleKeyDown} />}>
         <Option value="1">1</Option>
         <Option value="2">2</Option>
       </Select>
@@ -436,9 +471,45 @@ describe('Select', () => {
 
     expect(wrapper.find('textarea').length).toBe(1);
     wrapper.find('.rc-select').simulate('click');
-    const dropdownWrapper = mount(wrapper.find('Trigger').node.getComponent());
+    wrapper.find('.rc-select').find('textarea').simulate('keyDown', { keyCode: KeyCode.NUM_ONE });
 
-    dropdownWrapper.find('MenuItem').first().simulate('click');
+    wrapper.find('MenuItem').first().simulate('click');
     expect(wrapper.state().inputValue).toBe('1');
+    expect(handleKeyDown).toBeCalled();
+  });
+
+  describe('propTypes', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    beforeEach(() => {
+      spy.mockReset();
+    });
+
+    afterAll(() => {
+      spy.mockRestore();
+    });
+
+    it('warns on invalid value when labelInValue', () => {
+      expect(() => {
+        mount(
+          <Select labelInValue value="foo" />
+        );
+      }).toThrow();
+      expect(spy.mock.calls[0][0]).toMatch(
+        'Warning: Failed prop type: Invalid prop `value` supplied to `Select`, ' +
+        'when you set `labelInValue` to `true`,' +
+        ' `value` should in shape of `{ key: string, label?: string }`'
+      );
+    });
+
+    it('warns on invalid value when multiple', () => {
+      mount(
+        <Select multiple value="" />
+      );
+      expect(spy.mock.calls[0][0]).toMatch(
+        'Warning: Failed prop type: Invalid prop `value` of type `string` supplied to `Select`, ' +
+        'expected `array` when `multiple` is `true`'
+      );
+    });
   });
 });

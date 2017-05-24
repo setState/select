@@ -8,7 +8,10 @@ export function getValuePropValue(child) {
   if (child.key) {
     return child.key;
   }
-  throw new Error(`no key or value for ${child}`);
+  if (child.type && child.type.isSelectOptGroup && props.label) {
+    return props.label;
+  }
+  throw new Error(`Need at least a key or a value or a label (only for OptGroup) for ${child}`);
 }
 
 export function getPropValue(child, prop) {
@@ -126,11 +129,15 @@ export function includesSeparators(string, separators) {
 export function splitBySeparators(string, separators) {
   const reg = new RegExp(`[${separators.join()}]`);
   const array = string.split(reg);
-  if (array[0] === '') {
+  while (array[0] === '') {
     array.shift();
   }
-  if (array[array.length - 1] === '') {
+  while (array[array.length - 1] === '') {
     array.pop();
   }
   return array;
+}
+
+export function defaultFilterFn(input, child) {
+  return String(getPropValue(child, this.props.optionFilterProp)).indexOf(input) > -1;
 }

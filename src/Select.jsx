@@ -1,5 +1,6 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
+import createClass from 'create-react-class';
 import KeyCode from 'rc-util/lib/KeyCode';
 import classnames from 'classnames';
 import Animate from 'rc-animate';
@@ -15,85 +16,40 @@ import {
 } from './util';
 import SelectTrigger from './SelectTrigger';
 import FilterMixin from './FilterMixin';
+import { SelectPropTypes } from './PropTypes';
 import warning from 'warning';
 
 function noop() {
-}
-
-function filterFn(input, child) {
-  return String(getPropValue(child, this.props.optionFilterProp)).indexOf(input) > -1;
 }
 
 function saveRef(name, component) {
   this[name] = component;
 }
 
-let valueObjectShape;
-
-if (PropTypes) {
-  valueObjectShape = PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.shape({
-      key: PropTypes.string,
-      label: PropTypes.node,
-    }),
-  ]);
+function chaining(...fns) {
+  return function (...args) {
+    for (let i = 0; i < fns.length; i++) {
+      if (fns[i] && typeof fns[i] === 'function') {
+        fns[i].apply(this, args);
+      }
+    }
+  };
 }
 
-const Select = React.createClass({
-  propTypes: {
-    defaultActiveFirstOption: PropTypes.bool,
-    multiple: PropTypes.bool,
-    filterOption: PropTypes.any,
-    children: PropTypes.any,
-    showSearch: PropTypes.bool,
-    disabled: PropTypes.bool,
-    allowClear: PropTypes.bool,
-    showArrow: PropTypes.bool,
-    tags: PropTypes.bool,
-    prefixCls: PropTypes.string,
-    className: PropTypes.string,
-    transitionName: PropTypes.string,
-    optionLabelProp: PropTypes.string,
-    optionFilterProp: PropTypes.string,
-    animation: PropTypes.string,
-    choiceTransitionName: PropTypes.string,
-    onChange: PropTypes.func,
-    onBlur: PropTypes.func,
-    onFocus: PropTypes.func,
-    onSelect: PropTypes.func,
-    onSearch: PropTypes.func,
-    placeholder: PropTypes.any,
-    onDeselect: PropTypes.func,
-    labelInValue: PropTypes.bool,
-    value: PropTypes.oneOfType([
-      valueObjectShape,
-      PropTypes.arrayOf(valueObjectShape),
-    ]),
-    defaultValue: PropTypes.oneOfType([
-      valueObjectShape,
-      PropTypes.arrayOf(valueObjectShape),
-    ]),
-    dropdownStyle: PropTypes.object,
-    maxTagTextLength: PropTypes.number,
-    tokenSeparators: PropTypes.arrayOf(PropTypes.string),
-    getInputElement: PropTypes.func,
-    extraDataField: PropTypes.string //ux
-  },
+const Select = createClass({
+  propTypes: SelectPropTypes,
 
   mixins: [FilterMixin],
 
   getDefaultProps() {
     return {
       prefixCls: 'rc-select',
-      filterOption: filterFn,
       defaultOpen: false,
       labelInValue: false,
       defaultActiveFirstOption: true,
       showSearch: true,
       allowClear: false,
       placeholder: '',
-      defaultValue: [],
       onChange: noop,
       onFocus: noop,
       onBlur: noop,
@@ -191,6 +147,7 @@ const Select = React.createClass({
   },
 
   componentWillUnmount() {
+    this.clearFocusTime();
     this.clearBlurTime();
     this.clearAdjustTimer();
     if (this.dropdownContainer) {
@@ -201,7 +158,7 @@ const Select = React.createClass({
   },
 
   onInputChange(event) {
-    const {tokenSeparators} = this.props;
+    const { tokenSeparators } = this.props;
     const val = event.target.value;
     if (isMultipleOrTags(this.props) &&
       tokenSeparators &&
@@ -224,6 +181,12 @@ const Select = React.createClass({
   },
 
   onDropdownVisibleChange(open) {
+    if (open && !this._focused) {
+      this.clearBlurTime();
+      this.timeoutFocus();
+      this._focused = true;
+      this.updateFocusClassName();
+    }
     this.setOpenState(open);
   },
 
@@ -251,7 +214,7 @@ const Select = React.createClass({
     const keyCode = event.keyCode;
     if (isMultipleOrTags(props) && !event.target.value && keyCode === KeyCode.BACKSPACE) {
       event.preventDefault();
-      const {value} = state;
+      const { value } = state;
       if (value.length) {
         this.removeSelected(value[value.length - 1].key);
       }
@@ -282,7 +245,7 @@ const Select = React.createClass({
     }
   },
 
-  onMenuSelect({item}) {
+  onMenuSelect({ item }) {
     let value = this.state.value;
     const props = this.props;
     const selectedValue = getValuePropValue(item);
@@ -337,7 +300,7 @@ const Select = React.createClass({
     this.setInputValue(inputValue, false);
   },
 
-  onMenuDeselect({item, domEvent}) {
+  onMenuDeselect({ item, domEvent }) {
     if (domEvent.type === 'click') {
       this.removeSelected(getValuePropValue(item));
     }
@@ -358,13 +321,16 @@ const Select = React.createClass({
   },
 
   onOuterFocus(e) {
+    this.clearBlurTime();
     if (!isMultipleOrTagsOrCombobox(this.props) && e.target === this.getInputDOMNode()) {
       return;
     }
-    this.clearBlurTime();
+    if (this._focused) {
+      return;
+    }
     this._focused = true;
     this.updateFocusClassName();
-    this.props.onFocus();
+    this.timeoutFocus();
   },
 
   onPopupFocus() {
@@ -377,8 +343,8 @@ const Select = React.createClass({
       this._focused = false;
       this.updateFocusClassName();
       const props = this.props;
-      let {value} = this.state;
-      const {inputValue} = this.state;
+      let { value } = this.state;
+      const { inputValue } = this.state;
       if (isSingleMode(props) && props.showSearch &&
         inputValue && props.defaultActiveFirstOption) {
         const options = this._options || [];
@@ -408,7 +374,7 @@ const Select = React.createClass({
     if (props.disabled) {
       return;
     }
-    const {inputValue, value} = state;
+    const { inputValue, value } = state;
     event.stopPropagation();
     if (inputValue || value.length) {
       if (value.length) {
@@ -480,7 +446,7 @@ const Select = React.createClass({
       if (!this.props.labelInValue) {
         vls = vls.map(v => v.key);
       } else {
-        vls = vls.map(vl => ({key: vl.key, label: vl.label}));
+        vls = vls.map(vl => ({ key: vl.key, label: vl.label }));
       }
       return isMultipleOrTags(this.props) ? vls : vls[0];
     }
@@ -504,7 +470,7 @@ const Select = React.createClass({
   },
 
   getPlaceholderElement() {
-    const {props, state} = this;
+    const { props, state } = this;
     let hidden = false;
     if (state.inputValue) {
       hidden = true;
@@ -545,7 +511,7 @@ const Select = React.createClass({
       {React.cloneElement(inputElement, {
         ref: this.saveInputRef,
         onChange: this.onInputChange,
-        onKeyDown: this.onInputKeyDown,
+        onKeyDown: chaining(this.onInputKeyDown, inputElement.props.onKeyDown),
         value: this.state.inputValue,
         disabled: props.disabled,
         className: inputCls,
@@ -560,7 +526,9 @@ const Select = React.createClass({
   },
 
   getInputDOMNode() {
-    return this.inputInstance;
+    return this.topCtrlNode ?
+       this.topCtrlNode.querySelector('input,textarea,div[contentEditable]') :
+       this.inputInstance;
   },
 
   getInputMirrorDOMNode() {
@@ -576,7 +544,7 @@ const Select = React.createClass({
   },
 
   setOpenState(open, needFocus) {
-    const {props, state} = this;
+    const { props, state } = this;
     if (state.open === open) {
       this.maybeFocus(open, needFocus);
       return;
@@ -607,6 +575,22 @@ const Select = React.createClass({
       }
     }
   },
+
+  timeoutFocus() {
+    if (this.focusTimer) {
+      this.clearFocusTime();
+    }
+    this.focusTimer = setTimeout(() => {
+      this.props.onFocus();
+    }, 10);
+  },
+
+  clearFocusTime() {
+    if (this.focusTimer) {
+      clearTimeout(this.focusTimer);
+      this.focusTimer = null;
+    }
+  },
   clearBlurTime() {
     if (this.blurTimer) {
       clearTimeout(this.blurTimer);
@@ -620,7 +604,7 @@ const Select = React.createClass({
     }
   },
   updateFocusClassName() {
-    const {refs, props} = this;
+    const { refs, props } = this;
     // avoid setState and its side effect
     if (this._focused) {
       classes(refs.root).add(`${props.prefixCls}-focused`);
@@ -632,15 +616,17 @@ const Select = React.createClass({
   maybeFocus(open, needFocus) {
     if (needFocus || open) {
       const input = this.getInputDOMNode();
-      const {activeElement} = document;
+      const { activeElement } = document;
       if (input && (open || isMultipleOrTagsOrCombobox(this.props))) {
         if (activeElement !== input) {
           input.focus();
+          this._focused = true;
         }
       } else {
         const selection = this.refs.selection;
         if (activeElement !== selection) {
           selection.focus();
+          this._focused = true;
         }
       }
     }
@@ -740,10 +726,10 @@ const Select = React.createClass({
   },
 
   tokenize(string) {
-    const {multiple, tokenSeparators, children} = this.props;
+    const { multiple, tokenSeparators, children } = this.props;
     let nextValue = this.state.value;
     splitBySeparators(string, tokenSeparators).forEach(label => {
-      const selectedValue = {key: label, label};
+      const selectedValue = { key: label, label };
       if (findIndexInValueByLabel(nextValue, label) === -1) {
         if (multiple) {
           const value = this.getValueByLabel(children, label);
@@ -763,7 +749,7 @@ const Select = React.createClass({
     if (this.skipAdjustOpen) {
       return;
     }
-    let {open} = this.state;
+    let { open } = this.state;
     if (typeof document !== 'undefined' &&
       this.getInputDOMNode() &&
       document.activeElement === this.getInputDOMNode()) {
@@ -774,17 +760,19 @@ const Select = React.createClass({
       options = this.renderFilterOptions();
     }
     this._options = options;
-    if (open &&
-      (isMultipleOrTagsOrCombobox(this.props) || !this.props.showSearch) && !options.length) {
-      open = false;
+
+    if (isMultipleOrTagsOrCombobox(this.props) || !this.props.showSearch) {
+      if (open && !options.length) {
+        open = false;
+      }
     }
     this.state.open = open;
   },
 
   renderTopControlNode() {
-    const {value, open, inputValue} = this.state;
+    const { value, open, inputValue } = this.state;
     const props = this.props;
-    const {choiceTransitionName, prefixCls, maxTagTextLength, showSearch} = props;
+    const { choiceTransitionName, prefixCls, maxTagTextLength, showSearch } = props;
     const className = `${prefixCls}-selection__rendered`;
     // search input is inside topControlNode in single, multiple & combobox. 2016/04/13
     let innerNode = null;
@@ -859,9 +847,9 @@ const Select = React.createClass({
               <div className={`${prefixCls}-selection__choice__content`}>{content}</div>
               {
                 disabled ? null : <span
-                    className={`${prefixCls}-selection__choice__remove`}
-                    onClick={this.removeSelected.bind(this, singleValue.key)}
-                  />
+                  className={`${prefixCls}-selection__choice__remove`}
+                  onClick={this.removeSelected.bind(this, singleValue.key)}
+                />
               }
             </li>
           );
@@ -886,17 +874,23 @@ const Select = React.createClass({
         innerNode = <ul>{selectedValueNodes}</ul>;
       }
     }
-    return (<div className={className}>{this.getPlaceholderElement()}{innerNode}</div>);
+    return (<div
+      className={className}
+      ref={node => this.topCtrlNode = node}
+    >
+      {this.getPlaceholderElement()}
+      {innerNode}
+    </div>);
   },
 
   render() {
     const props = this.props;
     const multiple = isMultipleOrTags(props);
     const state = this.state;
-    const {className, disabled, allowClear, prefixCls} = props;
+    const { className, disabled, allowClear, prefixCls } = props;
     const ctrlNode = this.renderTopControlNode();
     let extraSelectionProps = {};
-    const {open} = this.state;
+    const { open } = this.state;
     const options = this._options;
     if (!isMultipleOrTagsOrCombobox(props)) {
       extraSelectionProps = {
@@ -974,7 +968,7 @@ const Select = React.createClass({
             {...extraSelectionProps}
           >
             {ctrlNode}
-            {allowClear && !multiple ? clear : null}
+            {allowClear ? clear : null}
             {multiple || !props.showArrow ? null :
               (<span
                 key="arrow"
@@ -992,4 +986,5 @@ const Select = React.createClass({
   },
 });
 
+Select.displayName = 'Select';
 export default Select;

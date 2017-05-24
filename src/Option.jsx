@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class Option extends React.Component {
   static propTypes = {
-    value: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
+    value: PropTypes.string,
   };
 
   static isSelectOption = true;
