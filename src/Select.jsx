@@ -455,9 +455,10 @@ const Select = createClass({
 
   getLabelByValue(children, value) {
     const label = this.getLabelBySingleValue(children, value);
-    if (label === null) {
-      return value;
-    }
+    // ux hide
+    // if (label === null) {
+    //   return value;
+    // }
     return label;
   },
 

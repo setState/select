@@ -25,8 +25,8 @@ function valueType(props, propName, componentName) {
     );
   } else {
     const validate = PropTypes.oneOfType([
-      PropTypes.arrayOf(PropTypes.string),
-      PropTypes.string,
+      PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string,PropTypes.number])),
+      PropTypes.oneOfType([PropTypes.string,PropTypes.number]),
     ]);
     return validate(...arguments);
   }
