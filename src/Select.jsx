@@ -72,7 +72,9 @@ export default class Select extends React.Component {
     notFoundContent: 'Not Found',
     backfill: false,
     extraDataField: 'extra', //ux
-    getPopupContainer: triggerNode => triggerNode.parentNode, //ux
+    getPopupContainer: () => {
+      return document.getElementById("main-content") || window.document.body;
+    }, //ux
   };
 
   constructor(props) {
