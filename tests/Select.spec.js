@@ -126,7 +126,7 @@ describe('Select', () => {
     expect(wrapper.find('.rc-select-selection-selected-value').props().children).toBe('1');
   });
 
-  it('filter options by values', () => {
+  it('filter options by "value" prop by default', () => {
     const wrapper = mount(
       <Select>
         <Option value="1">One</Option>
@@ -137,6 +137,31 @@ describe('Select', () => {
     wrapper.find('input').simulate('change', { target: { value: '1' } });
     expect(wrapper.find('MenuItem').length).toBe(1);
     expect(wrapper.find('MenuItem').props().value).toBe('1');
+  });
+
+  it('should filter options when filterOption is true', () => {
+    const wrapper = mount(
+      <Select filterOption>
+        <Option value="1">One</Option>
+        <Option value="2">Two</Option>
+      </Select>
+    );
+
+    wrapper.find('input').simulate('change', { target: { value: '2' } });
+    expect(wrapper.find('MenuItem').length).toBe(1);
+    expect(wrapper.find('MenuItem').props().value).toBe('2');
+  });
+
+  it('should not filter options when filterOption is false', () => {
+    const wrapper = mount(
+      <Select filterOption={false}>
+        <Option value="1">One</Option>
+        <Option value="2">Two</Option>
+      </Select>
+    );
+
+    wrapper.find('input').simulate('change', { target: { value: '1' } });
+    expect(wrapper.find('MenuItem').length).toBe(2);
   });
 
   it('specify which prop to filter', () => {
@@ -158,6 +183,19 @@ describe('Select', () => {
       <Select showSearch={false} value="1">
         <Option value="1">1</Option>
         <Option value="2">2</Option>
+      </Select>
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should contian falsy children', () => {
+    const wrapper = render(
+      <Select value="1">
+        <Option value="1">1</Option>
+        {null}
+        <Option value="2">2</Option>
+        {false}
       </Select>
     );
 
@@ -359,6 +397,43 @@ describe('Select', () => {
     it('set className', () => {
       expect(wrapper.find('.rc-select').node.className).not.toContain('-focus');
     });
+
+    // Fix https://github.com/ant-design/ant-design/issues/6342
+    it('should be close when blur Select[showSearch=false]', () => {
+      wrapper = mount(
+        <Select showSearch={false}>
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+        </Select>
+      );
+      wrapper.find('.rc-select').simulate('click');
+      expect(wrapper.state().open).toBe(true);
+      wrapper.find('.rc-select').simulate('blur');
+      jest.runAllTimers();
+      expect(wrapper.state().open).toBe(false);
+    });
+
+    // Fix https://github.com/ant-design/ant-design/issues/7720
+    it('should not trigger onFocus/onBlur when select is disabled', () => {
+      const onFocus = jest.fn();
+      const onBlur = jest.fn();
+      wrapper = mount(
+        <Select
+          onFocus={onFocus}
+          onBlur={onBlur}
+          disabled
+        >
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+        </Select>
+      );
+      jest.useFakeTimers();
+      wrapper.find('.rc-select').simulate('focus');
+      wrapper.find('.rc-select').simulate('blur');
+      jest.runAllTimers();
+      expect(onFocus).not.toBeCalled();
+      expect(onBlur).not.toBeCalled();
+    });
   });
 
   describe('unmount', () => {
@@ -511,5 +586,125 @@ describe('Select', () => {
         'expected `array` when `multiple` is `true`'
       );
     });
+  });
+
+  it('set label as key for OptGroup', () => {
+    const wrapper = mount(
+      <Select open>
+        <OptGroup key="group1">
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+        </OptGroup>
+      </Select>
+    );
+
+    expect(wrapper.find('MenuItemGroup').props().title).toBe('group1');
+  });
+
+  it('filters options by inputValue', () => {
+    const wrapper = mount(
+      <Select open>
+        <Option value="1">1</Option>
+        <Option value="2">2</Option>
+        <Option value="11" disabled>11</Option>
+      </Select>
+    );
+
+    wrapper.find('input').simulate('change', { target: { value: '1' } });
+    expect(wrapper.find('li')).toHaveLength(1);
+    expect(wrapper.find('li').text()).toEqual('1');
+  });
+
+  it('renders not found when search result is empty', () => {
+    const wrapper = mount(
+      <Select open>
+        <Option value="1">1</Option>
+        <Option value="2">2</Option>
+      </Select>
+    );
+
+    wrapper.find('input').simulate('change', { target: { value: '3' } });
+    expect(wrapper.find('li')).toHaveLength(1);
+    expect(wrapper.find('li').text()).toEqual('Not Found');
+  });
+
+  it('warns on invalid children', () => {
+    const Foo = () => <div>foo</div>;
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mount(
+      <Select open>
+        <Foo value="1" />
+      </Select>
+    );
+    expect(spy.mock.calls.length).toBe(1);
+    expect(spy.mock.calls[0][0]).toContain(
+      'the children of `Select` should be `Select.Option` or `Select.OptGroup`, ' +
+      `instead of \`Foo\`.`
+    );
+    spy.mockRestore();
+  });
+
+  it('filterOption could be true as described in default value', () => {
+    const wrapper = render(
+      <Select inputValue="3" filterOption open>
+        <Option value="1">1</Option>
+        <Option value="2">2</Option>
+      </Select>
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('does not filter when filterOption value is false', () => {
+    const wrapper = render(
+      <Select inputValue="1" filterOption={false} open>
+        <Option value="1">1</Option>
+        <Option value="2">2</Option>
+      </Select>
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('backfill', () => {
+    const handleChange = jest.fn();
+    const handleSelect = jest.fn();
+    const wrapper = mount(
+      <Select
+        backfill
+        open
+        onChange={handleChange}
+        onSelect={handleSelect}
+        optionLabelProp="children"
+      >
+        <Option value="1">One</Option>
+        <Option value="2">Two</Option>
+      </Select>
+    );
+
+    const input = wrapper.find('input');
+
+    input.simulate('keyDown', { keyCode: KeyCode.DOWN });
+
+    expect(wrapper.state().value).toEqual([
+      {
+        key: '2',
+        label: 'Two',
+        backfill: true,
+      },
+    ]);
+    expect(handleChange).not.toBeCalled();
+    expect(handleSelect).not.toBeCalled();
+
+    input.simulate('keyDown', { keyCode: KeyCode.ENTER });
+
+    expect(wrapper.state().value).toEqual([
+      {
+        key: '2',
+        label: 'Two',
+      },
+    ]);
+    expect(handleChange).toBeCalledWith('2');
+    expect(handleSelect).toBeCalledWith('2', expect.anything());
   });
 });
