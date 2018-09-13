@@ -1,5 +1,5 @@
 {
-  "name": "rc-select",
+  "name": "@unovo/rc-select",
   "version": "6.9.3",
   "description": "React Select",
   "keywords": [
@@ -34,7 +34,6 @@
     "lint": "rc-tools run lint",
     "lint:fix": "rc-tools run lint --fix",
     "test": "jest",
-    "prepublish": "rc-tools run guard",
     "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "jest": {
