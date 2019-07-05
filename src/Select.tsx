@@ -622,7 +622,7 @@ class Select extends React.Component<Partial<ISelectProps>, ISelectState> {
     if (info) {
       return info;
     }
-    let defaultLabel = value;
+    let defaultLabel = null;
     if (this.props.labelInValue) {
       const valueLabel = getLabelFromPropsValue(this.props.value, value);
       const defaultValueLabel = getLabelFromPropsValue(this.props.defaultValue, value);
