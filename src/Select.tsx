@@ -646,6 +646,12 @@ class Select extends React.Component<Partial<ISelectProps>, ISelectState> {
 
   public getOptionBySingleValue = (value: valueType) => {
     const { option } = this.getOptionInfoBySingleValue(value);
+
+    // todo 给onChange第二参数添加extra
+    if (option.props.extra) {
+      option.extra = option.props.extra;
+    }
+
     return option;
   };
 
