@@ -65,7 +65,7 @@ export function toArray(value: valueType | undefined): valueType | undefined {
 }
 
 export function getMapKey(value: valueType) {
-  return `${typeof value}-${value}`;
+  return `string-${value}`;
 }
 
 export function preventDefaultEvent(e: any) {
