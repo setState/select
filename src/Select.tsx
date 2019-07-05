@@ -920,15 +920,16 @@ class Select extends React.Component<Partial<ISelectProps>, ISelectState> {
   // ux start
   public getValue() {
     warning(false, "getValue is deprecated, don't use it.");
+    const value = this.state.value as string[];
 
     if (isMultipleOrTags(this.props)) {
-      return this.state.value;
+      return value;
     } else {
-      return this.state.value[0];
+      return value.length > 0 ? value[0] : '';
     }
   }
 
-  public setValue(value) {
+  public setValue(value: any) {
     warning(false, "setValue is deprecated, don't use it.");
     this.setState({
       value: [value],
