@@ -56,7 +56,7 @@ export function isSingleMode(props: any) {
 
 export function toArray(value: valueType | undefined): valueType | undefined {
   let ret = value;
-  if (value === undefined) {
+  if (!value) {
     ret = [];
   } else if (!Array.isArray(value)) {
     ret = [value as string];
