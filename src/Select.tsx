@@ -917,6 +917,25 @@ class Select extends React.Component<Partial<ISelectProps>, ISelectState> {
     }
   }
 
+  // ux start
+  public getValue() {
+    warning(false, "getValue is deprecated, don't use it.");
+
+    if (isMultipleOrTags(this.props)) {
+      return this.state.value;
+    } else {
+      return this.state.value[0];
+    }
+  }
+
+  public setValue(value) {
+    warning(false, "setValue is deprecated, don't use it.");
+    this.setState({
+      value: [value],
+    });
+  }
+  // ux end
+
   public markMouseDown = () => {
     this._mouseDown = true;
   };
