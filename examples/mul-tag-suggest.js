@@ -1,30 +1,30 @@
 /* eslint no-console: 0 */
 
 import React from 'react';
-import Select, { Option } from 'rc-select';
-import 'rc-select/assets/index.less';
-import { fetch } from './common/tbFetchSuggest';
-import ReactDOM from 'react-dom';
+import Select, { Option } from '../src';
+import '../assets/index.less';
 
-class Search extends React.Component {
+import { fetch } from './common/tbFetchSuggest';
+
+class Test extends React.Component {
   state = {
     data: [],
     value: [],
   };
 
-  onChange = (value) => {
+  onChange = value => {
     console.log('onChange ', value);
     this.setState({
       value,
     });
   };
 
-  onSelect = (value) => {
+  onSelect = value => {
     console.log('select ', value);
   };
 
-  fetchData = (value) => {
-    fetch(value, (data) => {
+  fetchData = value => {
+    fetch(value, data => {
       this.setState({
         data,
       });
@@ -32,32 +32,38 @@ class Search extends React.Component {
   };
 
   render() {
-    const data = this.state.data;
-    const options = data.map((d) => {
-      return <Option key={d.value}><i>{d.text}</i></Option>;
+    const { value, data } = this.state;
+    const options = data.map(d => {
+      return (
+        <Option key={d.value}>
+          <i>{d.text}</i>
+        </Option>
+      );
     });
-    return (<div>
-      <h2>multiple suggest</h2>
-
+    return (
       <div>
-        <Select
-          style={{ width: 500 }}
-          labelInValue
-          optionLabelProp="children"
-          value={this.state.value}
-          onChange={this.onChange}
-          tags
-          placeholder="placeholder"
-          notFoundContent=""
-          onSearch={this.fetchData}
-          onSelect={this.onSelect}
-          filterOption={false}
-        >
-          {options}
-        </Select>
+        <h2>multiple suggest</h2>
+
+        <div>
+          <Select
+            style={{ width: 500 }}
+            labelInValue
+            optionLabelProp="children"
+            value={value}
+            onChange={this.onChange}
+            tags
+            placeholder="placeholder"
+            notFoundContent=""
+            onSearch={this.fetchData}
+            onSelect={this.onSelect}
+            filterOption={false}
+          >
+            {options}
+          </Select>
+        </div>
       </div>
-    </div>);
+    );
   }
 }
 
-ReactDOM.render(<Search />, document.getElementById('__react-content'));
+export default Test;

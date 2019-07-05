@@ -4,10 +4,11 @@ import React from 'react';
 import Select, { Option } from '../src';
 import '../assets/index.less';
 
-class Test extends React.Component {
+class Controlled extends React.Component {
   state = {
     destroy: false,
     value: 9,
+    open: true,
   };
 
   onChange = e => {
@@ -37,21 +38,18 @@ class Test extends React.Component {
     console.log('onFocus');
   };
 
-  onSearch = val => {
-    console.log('Search:', val);
+  onDropdownVisibleChange = open => {
+    this.setState({ open });
   };
 
   render() {
-    const { value, destroy } = this.state;
+    const { open, destroy, value } = this.state;
     if (destroy) {
       return null;
     }
     return (
       <div style={{ margin: 20 }}>
-        <div style={{ height: 150 }} />
-
-        <h2>Single Select</h2>
-
+        <h2>controlled Select</h2>
         <div style={{ width: 300 }}>
           <Select
             id="my-select"
@@ -61,13 +59,11 @@ class Test extends React.Component {
             style={{ width: 500 }}
             onBlur={this.onBlur}
             onFocus={this.onFocus}
-            onSearch={this.onSearch}
-            allowClear
+            open={open}
             optionLabelProp="children"
             optionFilterProp="text"
             onChange={this.onChange}
-            firstActiveValue="2"
-            backfill
+            onDropdownVisibleChange={this.onDropdownVisibleChange}
           >
             <Option value="01" text="jack" title="jack">
               <b
@@ -96,31 +92,9 @@ class Test extends React.Component {
             })}
           </Select>
         </div>
-        <h2>native select</h2>
-        <select value={value} style={{ width: 500 }} onChange={this.onChange}>
-          <option value="01">jack</option>
-          <option value="11">lucy</option>
-          <option value="21" disabled>
-            disabled
-          </option>
-          <option value="31">yiminghe</option>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => {
-            return (
-              <option value={i} key={i}>
-                {i}
-              </option>
-            );
-          })}
-        </select>
-
-        <p>
-          <button type="button" onClick={this.onDestroy}>
-            destroy
-          </button>
-        </p>
       </div>
     );
   }
 }
 
-export default Test;
+export default Controlled;

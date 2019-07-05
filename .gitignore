@@ -26,3 +26,14 @@ coverage
 .vscode
 yarn.lock
 es/
+package-lock.json
+src/*.js
+src/*.map
+.prettierrc
+jest.config.js
+tslint.json
+tsconfig.test.json
+.eslintrc.js
+.prettierignore
+.storybook
+storybook/index.js

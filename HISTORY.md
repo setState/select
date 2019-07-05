@@ -1,6 +1,80 @@
 # History
 ----
 
+## 9.0.0 / 2019-02-27
+
+- Multiple mode also support `showArrow`
+- Add loading className
+
+## 8.8.0 / 2019-01-29
+
+- Add an additional className when popup is empty
+
+## 8.6.0 / 2018-11-27
+
+- Added `loading` prop.
+- Allow search Option Group title.
+
+## 8.5.0 / 2018-11-26
+
+- Added `dropdownRender` prop.
+
+## 8.4.0 / 2018-10-08
+
+- Adjust focus / blur logic
+- Space support open select
+
+## 8.3.0 / 2018-09-28
+
+- `open` support controlled
+
+## 8.2.0 / 2018-08-07
+
+- Add inputIcon, clearIcon, removeIcon.
+
+## 8.1.0 / 2018-06-24
+
+- Add id prop.
+- Support data attributes. https://github.com/react-component/select/pull/305
+
+## 8.0.2 / 2018-05-03
+
+- Refactoring: Migrate to new lifecycle methods https://github.com/react-component/select/pull/291
+
+## 8.0.0 / 2018-04-28
+
+- Upgrade rc-menu to 7.0.1
+- Add prop `autoClearSearchValue`.
+
+## 7.7.8 / 2018-04-19
+
+- Fix: value is wrong when blur https://github.com/react-component/select/pull/290
+
+## 7.7.6 / 2018-03-30
+
+- Refactoring: update state.value format https://github.com/react-component/select/pull/277
+
+## 7.7.5 / 2018-03-13
+
+- Fire change on blur for tags mode https://github.com/react-component/select/pull/271
+- Fix defaultFilter can not filter array children https://github.com/react-component/select/pull/276
+
+## 7.5.0 / 2017-12-11
+
+- Add onInputKeydown
+
+## 7.2.0 / 2017-11-16
+
+- Add onPopupScroll.
+
+## 7.0.0 / 2017-10-30
+
+- Allow numbe value in Option
+- Add maxTagCount and maxTagTextLength https://github.com/react-component/select/pull/224
+- Add showAction https://github.com/react-component/select/pull/224
+- Add onMouseEnter and onMouseLeave https://github.com/react-component/select/pull/238
+- Add focus() and autoFocus
+
 ## 6.9.0 / 2017-09-01
 
 - add backfill in single/combobox mode

@@ -1,5 +1,4 @@
 /* eslint no-console: 0 */
-
 import React from 'react';
 import Select, { Option } from '../src';
 import '../assets/index.less';
@@ -15,7 +14,6 @@ for (let i = 10; i < 36; i++) {
 
 class Test extends React.Component {
   state = {
-    disabled: false,
     value: ['name2', 'name3'],
   };
 
@@ -34,24 +32,16 @@ class Test extends React.Component {
     console.log(`deselected ${value}`, option);
   };
 
-  toggleDisabled = () => {
-    const { disabled } = this.state;
-    this.setState({
-      disabled: !disabled,
-    });
-  };
-
-  toggleMaxTagCount = count => {
-    this.setState({
-      maxTagCount: count,
-    });
-  };
-
   render() {
-    const { value, maxTagCount, disabled } = this.state;
+    const { value } = this.state;
     return (
-      <div>
-        <h2>tags select（scroll the menu）</h2>
+      <div
+        onMouseDown={e => {
+          e.preventDefault();
+          return false;
+        }}
+      >
+        <h2>custom dropdown render select</h2>
 
         <div>
           <Select
@@ -59,9 +49,6 @@ class Test extends React.Component {
             tags
             dropdownMenuStyle={{ maxHeight: 200 }}
             style={{ width: 500 }}
-            disabled={disabled}
-            maxTagCount={maxTagCount}
-            maxTagTextLength={10}
             value={value}
             onChange={this.onChange}
             onSelect={this.onSelect}
@@ -69,21 +56,31 @@ class Test extends React.Component {
             tokenSeparators={[' ', ',']}
             onFocus={() => console.log('focus')}
             onBlur={() => console.log('blur')}
+            dropdownRender={menu => (
+              <React.Fragment>
+                <div
+                  onClick={() => {
+                    console.log('before clicked');
+                  }}
+                >
+                  BEFORE
+                </div>
+
+                {menu}
+
+                <div
+                  onClick={() => {
+                    console.log('after clicked');
+                  }}
+                >
+                  AFTER
+                </div>
+              </React.Fragment>
+            )}
           >
             {children}
           </Select>
         </div>
-        <p>
-          <button type="button" onClick={this.toggleDisabled}>
-            toggle disabled
-          </button>
-          <button type="button" onClick={() => this.toggleMaxTagCount(0)}>
-            toggle maxTagCount (0)
-          </button>
-          <button type="button" onClick={() => this.toggleMaxTagCount(1)}>
-            toggle maxTagCount (1)
-          </button>
-        </p>
       </div>
     );
   }
