@@ -32,7 +32,7 @@
     "compile": "rc-tools run compile --babel-runtime",
     "gh-pages": "rc-tools run gh-pages",
     "start": "rc-tools run storybook",
-    "pub": "rc-tools run pub --babel-runtime",
+    "pub": "rc-tools run publish --babel-runtime",
     "lint": "rc-tools run lint",
     "lint:fix": "rc-tools run lint --fix",
     "prettier": "rc-tools run prettier",
