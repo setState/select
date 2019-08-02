@@ -28,7 +28,7 @@
     "port": 8003
   },
   "scripts": {
-    "build": "rc-tools run build",
+    "build": "rc-tools run watch",
     "compile": "rc-tools run compile --babel-runtime",
     "gh-pages": "rc-tools run gh-pages",
     "start": "rc-tools run storybook",
